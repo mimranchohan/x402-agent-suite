@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>x402 Scam Radar — Live Agent Reputation Network</title>
+<meta name="description" content="Live reputation & scam radar for the agent economy. Check any wallet or merchant's trust score, and watch high-risk subjects flagged in real time across Base, Solana and Polygon."/>
+<link rel="icon" href="/assets/x402-trustlayer-logo.png"/>
+<style>
+  :root{--bg:#070b0c;--panel:#101718;--panel2:#0c1213;--line:#1c2829;--txt:#e6f0ef;--muted:#8aa3a1;--dim:#5d7472;
+    --teal:#16C7C0;--teal2:#0fa39d;--green:#34D399;--amber:#FBBF24;--red:#ff5c6c;--orange:#F97316;
+    --mono:ui-monospace,Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+  *{box-sizing:border-box}
+  body{margin:0;background:
+      radial-gradient(900px 500px at 85% -10%,rgba(255,92,108,.10),transparent),
+      radial-gradient(900px 500px at 10% 0%,rgba(22,199,192,.10),transparent),var(--bg);
+    color:var(--txt);font-family:var(--sans);line-height:1.5;overflow-x:hidden}
+  a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+  .mono{font-family:var(--mono)}
+  header.top{border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(7,11,12,.82);backdrop-filter:blur(8px);z-index:40}
+  .top-row{display:flex;align-items:center;gap:14px;padding:14px 0;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700}
+  .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--red);box-shadow:0 0 14px var(--red);animation:blip 1.4s infinite}
+  @keyframes blip{0%,100%{opacity:1}50%{opacity:.3}}
+  .top nav{margin-left:auto;display:flex;gap:16px;font-size:13px;flex-wrap:wrap}
+  .hero{text-align:center;padding:48px 0 10px}
+  .kick{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--red);font-weight:700}
+  h1{font-size:38px;margin:8px 0 6px;line-height:1.1}
+  h1 .grad{background:linear-gradient(90deg,var(--red),var(--orange),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{color:var(--muted);max-width:620px;margin:0 auto}
+  .counters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:30px 0}
+  .ct{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:14px;padding:18px;text-align:center}
+  .ct .n{font-size:34px;font-weight:800;font-family:var(--mono)}
+  .ct .l{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--dim);margin-top:4px}
+  .ct.flag .n{color:var(--red)} .ct.ok .n{color:var(--green)} .ct.tot .n{color:var(--teal)}
+  .checker{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:16px;padding:22px;margin:8px 0 26px}
+  .checker h3{margin:0 0 12px;font-size:16px}
+  .crow{display:flex;gap:10px;flex-wrap:wrap}
+  .crow input{flex:1;min-width:220px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:13px 14px;color:var(--txt);font-family:var(--mono);font-size:14px}
+  .crow button{background:var(--teal);color:#04201f;border:0;border-radius:10px;padding:13px 20px;font-weight:700;cursor:pointer;font-size:14px}
+  .crow button:hover{background:var(--teal2)}
+  .result{margin-top:18px;display:none}
+  .result.show{display:block;animation:fade .3s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
+  .card{display:flex;gap:20px;align-items:center;flex-wrap:wrap;border:1px solid var(--line);border-radius:14px;padding:20px;background:var(--bg)}
+  .gauge{--p:50;width:120px;height:120px;border-radius:50%;display:grid;place-items:center;flex-shrink:0;
+    background:conic-gradient(var(--gc) calc(var(--p)*1%),#1a2526 0)}
+  .gauge .inner{width:92px;height:92px;border-radius:50%;background:var(--bg);display:grid;place-items:center;text-align:center}
+  .gauge .score{font-size:30px;font-weight:800;font-family:var(--mono)}
+  .gauge .max{font-size:11px;color:var(--dim)}
+  .cmeta{flex:1;min-width:200px}
+  .cmeta .subj{font-family:var(--mono);font-size:14px;color:var(--teal);word-break:break-all}
+  .tier{display:inline-block;font-size:12px;font-weight:700;border-radius:6px;padding:3px 10px;margin:8px 0}
+  .cmeta .obs{color:var(--muted);font-size:13px}
+  .cmeta .note{color:var(--dim);font-size:12px;margin-top:8px}
+  .share{margin-top:10px;background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:8px 12px;font-size:12px;cursor:pointer}
+  .share.copied{background:var(--green);color:#04201f}
+  h2.sec{font-size:18px;margin:30px 0 12px}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line)}
+  th{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.05em;background:var(--panel2)}
+  tr:last-child td{border-bottom:none}
+  td.subj{font-family:var(--mono);color:#ffb4bb;word-break:break-all}
+  .badge{font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px}
+  .empty{color:var(--muted);padding:24px;text-align:center}
+  .disclaimer{color:var(--dim);font-size:12px;margin:18px 0 0}
+  footer{border-top:1px solid var(--line);margin-top:36px;padding:20px 0;color:var(--dim);font-size:12px}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap top-row">
+  <div class="brand"><span class="dot"></span> x402 Scam Radar</div>
+  <nav><a href="/">Home</a><a href="/dashboard">Dashboard</a><a href="/commons">Commons</a><a href="/status">Status</a><a href="/pricing">Pricing</a></nav>
+</div></header>
+
+<main class="wrap">
+  <div class="hero">
+    <p class="kick">● Live · Agent Reputation Network</p>
+    <h1>Is that agent a <span class="grad">scammer?</span></h1>
+    <p class="lead">A live reputation graph for the agent economy. Every guard &amp; KYM check across Base, Solana &amp; Polygon feeds it. Look up any wallet or merchant before you trust it.</p>
+  </div>
+
+  <div class="counters" id="counters">
+    <div class="ct tot"><div class="n" id="c-subjects">—</div><div class="l">Subjects tracked</div></div>
+    <div class="ct"><div class="n" id="c-obs">—</div><div class="l">Observations</div></div>
+    <div class="ct flag"><div class="n" id="c-risk">—</div><div class="l">High-risk flagged</div></div>
+  </div>
+
+  <div class="checker">
+    <h3>🔎 Check a wallet or merchant</h3>
+    <div class="crow">
+      <input id="q" type="text" placeholder="0x… wallet  or  merchant-host.com" autocomplete="off"/>
+      <button id="go">Check trust</button>
+    </div>
+    <div class="result" id="result">
+      <div class="card">
+        <div class="gauge" id="gauge"><div class="inner"><div><div class="score" id="r-score">–</div><div class="max">/100</div></div></div></div>
+        <div class="cmeta">
+          <div class="subj" id="r-subj"></div>
+          <span class="tier" id="r-tier"></span>
+          <div class="obs" id="r-obs"></div>
+          <div class="note" id="r-note"></div>
+          <button class="share" id="r-share">Copy shareable result</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="sec">🚨 Live watchlist — highest-risk subjects</h2>
+  <div id="watchlist"><div class="empty">Loading…</div></div>
+
+  <p class="disclaimer">Reputation scores are advisory signals aggregated from network checks — not proof of guilt. A neutral 50 means "no data yet". Build the graph: route your agent's payments through the Trust Layer.</p>
+</main>
+
+<footer><div class="wrap">x402 Scam Radar · powered by the x402 Trust Layer reputation network · <a href="/">x402trustlayer.xyz</a> · © 2026</div></footer>
+
+<script src="/reputation.js"></script>
+</body>
+</html>
