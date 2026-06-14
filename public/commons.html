@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Agent Trust Commons — One passport, every network</title>
+<meta name="description" content="The neutral hub for agent trust. Unify Visa, Mastercard, Skyfire, Kite, ERC-8004 and x402 reputation into one verifiable passport. We compete with none of them — we connect them all."/>
+<link rel="icon" href="/assets/x402-trustlayer-logo.png"/>
+<style>
+  :root{--bg:#080c0e;--panel:#101718;--panel2:#0c1213;--line:#1c2829;--txt:#e6f0ef;--muted:#8aa3a1;--dim:#5d7472;
+    --teal:#16C7C0;--teal2:#0fa39d;--blue:#5b8def;--green:#34D399;--amber:#FBBF24;--red:#ff5c6c;
+    --mono:ui-monospace,Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+  *{box-sizing:border-box}
+  body{margin:0;background:
+      radial-gradient(900px 500px at 15% -10%,rgba(91,141,239,.10),transparent),
+      radial-gradient(900px 500px at 90% 0%,rgba(22,199,192,.10),transparent),var(--bg);
+    color:var(--txt);font-family:var(--sans);line-height:1.55}
+  a{color:var(--teal);text-decoration:none}a:hover{text-decoration:underline}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 22px}
+  .mono{font-family:var(--mono)}
+  header.top{border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(8,12,14,.82);backdrop-filter:blur(8px);z-index:40}
+  .top-row{display:flex;align-items:center;gap:14px;padding:14px 0;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700}
+  .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--teal);box-shadow:0 0 12px var(--teal)}
+  .top nav{margin-left:auto;display:flex;gap:16px;font-size:13px;flex-wrap:wrap}
+  .hero{text-align:center;padding:54px 0 12px}
+  .kick{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);font-weight:700}
+  h1{font-size:40px;margin:8px 0 8px;line-height:1.08}
+  h1 .grad{background:linear-gradient(90deg,var(--blue),var(--teal),var(--green));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{color:var(--muted);max-width:640px;margin:0 auto 4px}
+  .pill{display:inline-block;font-size:12px;color:var(--green);border:1px solid rgba(52,211,153,.4);border-radius:999px;padding:5px 14px;margin-top:14px}
+  h2.sec{font-size:20px;margin:38px 0 10px}
+  .why{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:14px 0}
+  @media(max-width:680px){.why{grid-template-columns:1fr}}
+  .why .b{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:14px;padding:18px}
+  .why .b h3{margin:0 0 6px;font-size:15px}
+  .why .b p{margin:0;color:var(--muted);font-size:13.5px}
+  .nets{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin:14px 0}
+  .net{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .net .l{font-weight:600;font-size:14px}
+  .net .k{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.05em;margin-top:4px}
+  .resolver{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:16px;padding:22px;margin:10px 0 26px}
+  .resolver h3{margin:0 0 12px}
+  .crow{display:flex;gap:10px;flex-wrap:wrap}
+  .crow input{flex:1;min-width:220px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:13px 14px;color:var(--txt);font-family:var(--mono);font-size:14px}
+  .crow button{background:var(--teal);color:#04201f;border:0;border-radius:10px;padding:13px 20px;font-weight:700;cursor:pointer}
+  .crow button:hover{background:var(--teal2)}
+  .res{margin-top:18px;display:none}.res.show{display:block;animation:fade .3s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
+  .head{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+  .big{font-size:34px;font-weight:800;font-family:var(--mono)}
+  .tier{font-size:12px;font-weight:700;border-radius:6px;padding:3px 10px}
+  .subj{font-family:var(--mono);font-size:13px;color:var(--teal);word-break:break-all}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line)}
+  th{color:var(--dim);font-size:11px;text-transform:uppercase;background:var(--panel2)}
+  tr:last-child td{border-bottom:none}
+  .friendly{background:rgba(52,211,153,.07);border:1px solid rgba(52,211,153,.3);border-radius:14px;padding:18px;margin:8px 0;color:#cdeee2;font-size:14px}
+  .model{color:var(--muted);font-size:13.5px}
+  footer{border-top:1px solid var(--line);margin-top:36px;padding:20px 0;color:var(--dim);font-size:12px}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap top-row">
+  <div class="brand"><span class="dot"></span> Agent Trust Commons</div>
+  <nav><a href="/">Home</a><a href="/reputation">Scam Radar</a><a href="/dashboard">Dashboard</a><a href="https://github.com/mimranchohan/x402-trust-layer">GitHub</a></nav>
+</div></header>
+
+<main class="wrap">
+  <div class="hero">
+    <p class="kick">◇ Neutral · Open · For everyone</p>
+    <h1>One trust passport.<br/><span class="grad">Every network.</span></h1>
+    <p class="lead">Visa, Mastercard, Skyfire, Kite, ERC-8004, x402 — each builds its own trust silo, and none talk to each other. The Commons is the neutral hub that unifies them into one verifiable passport. <strong>We compete with none of them. We connect them all.</strong></p>
+    <span class="pill">● Open standard · reference resolver live</span>
+  </div>
+
+  <h2 class="sec">The problem we don't add to</h2>
+  <div class="why">
+    <div class="b"><h3>Trust is fragmented</h3><p>A Skyfire-verified agent isn't recognized by a Kite merchant. An ERC-8004 score can't be read in a Visa flow. Every network is an island.</p></div>
+    <div class="b"><h3>Neutrality is the moat</h3><p>Visa will never display Mastercard's score. Only a party that competes with no one can show them all. Being independent is the strength here.</p></div>
+    <div class="b"><h3>Everyone benefits</h3><p>When a network plugs in, its signal reaches everywhere — its value grows. We're additive to every player, a threat to none.</p></div>
+    <div class="b"><h3>Open by design</h3><p>The passport standard is open-source. We run the reference hub and earn on hosting, SLA and integration — never by locking the data.</p></div>
+  </div>
+
+  <h2 class="sec">Networks the Commons can unify</h2>
+  <div class="nets" id="nets"><div class="net"><div class="l">Loading…</div></div></div>
+
+  <h2 class="sec">Try the universal resolver</h2>
+  <div class="resolver">
+    <h3>🌐 Resolve any subject across all networks</h3>
+    <div class="crow">
+      <input id="q" type="text" placeholder="0x… wallet  ·  agent id  ·  merchant-host.com" autocomplete="off"/>
+      <button id="go">Resolve</button>
+    </div>
+    <div class="res" id="res">
+      <div class="head">
+        <div class="big" id="r-score">–</div>
+        <div>
+          <span class="tier" id="r-tier"></span>
+          <div class="subj" id="r-subj"></div>
+          <div class="model" id="r-meta"></div>
+        </div>
+      </div>
+      <table><thead><tr><th>Source network</th><th>Type</th><th>Score</th><th>Weight</th></tr></thead><tbody id="r-cov"></tbody></table>
+      <p class="model" id="r-note" style="margin-top:10px"></p>
+    </div>
+  </div>
+
+  <div class="friendly">
+    <strong>To every network:</strong> we are Switzerland. Plug your score into the Commons and reach every agent, wallet and marketplace — your reputation product gets more valuable, not less. <a href="mailto:mimran@x402trustlayer.xyz?subject=Join%20Agent%20Trust%20Commons">Let's connect →</a>
+  </div>
+
+  <h2 class="sec">How it stays free for everyone (the business model)</h2>
+  <p class="model">The <strong>standard is open-source</strong> — anyone can read, contribute, or self-host. We earn on convenience, like Plaid or Twilio: <strong>hosted resolution &amp; caching</strong>, <strong>premium SLA + analytics</strong> for enterprises, <strong>integration services</strong> for networks, and an optional <strong>verified badge</strong> for merchants. Governance opens to a multi-party council as adoption grows — so no one fears a new silo. <a href="https://github.com/mimranchohan/x402-trust-layer/blob/main/docs/AGENT-TRUST-COMMONS.md">Read the manifesto →</a></p>
+</main>
+
+<footer><div class="wrap">Agent Trust Commons · a neutral public good operated by the x402 Trust Layer · <a href="/">x402trustlayer.xyz</a> · © 2026</div></footer>
+
+<script src="/commons.js"></script>
+</body>
+</html>

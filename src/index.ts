@@ -164,6 +164,18 @@ app.get("/legal", (_req, res) => {
   res.sendFile(join(process.cwd(), "public", "legal.html"));
 });
 
+/** Public Scam Radar / reputation page. */
+app.get("/reputation", (_req, res) => {
+  res.setHeader("Cache-Control", "public, max-age=60");
+  res.sendFile(join(process.cwd(), "public", "reputation.html"));
+});
+
+/** Agent Trust Commons — neutral hub landing. */
+app.get("/commons", (_req, res) => {
+  res.setHeader("Cache-Control", "public, max-age=300");
+  res.sendFile(join(process.cwd(), "public", "commons.html"));
+});
+
 /** Static public files (landing.js, data, assets). index.html served via GET / negotiation. */
 app.use(
   express.static(join(process.cwd(), "public"), {

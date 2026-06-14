@@ -22,6 +22,7 @@ import {
   getPartnerUsage,
 } from "../lib/partner-registry.js";
 import { buildCrossProtocolPassport, type ProtocolSignal } from "../lib/cross-protocol-passport.js";
+import { resolveTrust, listKnownNetworks } from "../lib/trust-resolver.js";
 
 const LOOKUP_PER_HOUR = Number(process.env.RATE_LIMIT_AGENT_LOOKUP_PER_HOUR ?? "60") || 60;
 
@@ -220,4 +221,26 @@ export function registerGrowthRoutes(app: Express): void {
       res.json(passport);
     }),
   );
+
+  // ---- Agent Trust Commons: universal trust resolver (neutral hub) ----
+
+  /** List every network the Commons can unify. */
+  app.get("/api/trust/networks", limited, wrap(async (_req, res) => {
+    res.json({ standard: "Agent Trust Commons v0.1", networks: listKnownNetworks() });
+  }));
+
+  /** Resolve a subject across all known networks (reputation + passport). */
+  app.get("/api/trust/resolve/:subject", limited, wrap(async (req, res) => {
+    const subject = String(req.params.subject ?? "").trim();
+    if (!subject) { res.status(400).json({ error: "subject required" }); return; }
+    res.json(await resolveTrust(subject, []));
+  }));
+
+  /** Resolve with caller-contributed network signals (Visa/Skyfire/Kite/ERC-8004…). */
+  app.post("/api/trust/resolve", limited, wrap(async (req, res) => {
+    const body = (req.body ?? {}) as { subject?: string; networkSignals?: ProtocolSignal[]; ttlSeconds?: number };
+    if (!body.subject) { res.status(400).json({ error: "subject required" }); return; }
+    const signals = Array.isArray(body.networkSignals) ? body.networkSignals : [];
+    res.json(await resolveTrust(body.subject, signals, Number(body.ttlSeconds ?? 3600)));
+  }));
 }
