@@ -27,6 +27,7 @@ import { scrubMetadata } from "../lib/pii-metadata-filter.js";
 import { quoteGuarantee, buyGuarantee, claimGuarantee, poolStats } from "../lib/guarantee-pool.js";
 import { buildAnchor, latestAnchor, listAnchors, recordAnchorTx } from "../lib/reputation-anchor.js";
 import { SESSION_BUNDLES, SUBSCRIPTION_TIERS, valueBasedFee } from "../lib/pricing-tiers.js";
+import { reportToSolana8004, isSolana8004WriteEnabled, type X402Outcome } from "../lib/sources/solana-8004-writer.js";
 
 const LOOKUP_PER_HOUR = Number(process.env.RATE_LIMIT_AGENT_LOOKUP_PER_HOUR ?? "60") || 60;
 
@@ -302,5 +303,18 @@ export function registerGrowthRoutes(app: Express): void {
   app.post("/api/pricing/value-fee", limited, wrap(async (req, res) => {
     const b = (req.body ?? {}) as { amountUsdc?: number };
     res.json(valueBasedFee(Number(b.amountUsdc ?? 0)));
+  }));
+
+  // ---- Solana 8004 write-back (mirror outcomes on-chain) ----
+  app.get("/api/solana8004/status", limited, wrap(async (_req, res) => {
+    res.json({ writeEnabled: isSolana8004WriteEnabled() });
+  }));
+  app.post("/api/solana8004/report", wrap(async (req, res) => {
+    if (!isAdmin(req)) { res.status(403).json({ error: "X-Admin-Secret required" }); return; }
+    const b = (req.body ?? {}) as { agentAsset?: string; outcome?: X402Outcome; feedbackUri?: string };
+    if (!b.agentAsset || !b.outcome) { res.status(400).json({ error: "agentAsset and outcome required" }); return; }
+    const r = await reportToSolana8004(b.agentAsset, b.outcome, b.feedbackUri);
+    if (!r) { res.status(503).json({ error: "Solana 8004 write-back disabled (set SOLANA_8004_WRITE_ENABLED=1 + signer)" }); return; }
+    res.json(r);
   }));
 }

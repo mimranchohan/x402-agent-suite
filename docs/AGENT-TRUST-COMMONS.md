@@ -94,3 +94,43 @@ As adoption grows, governance opens to a **multi-party council** (networks, mark
 - Source & spec: **https://github.com/mimranchohan/x402-trust-layer**
 
 *Agent Trust Commons — one passport, every network. Neutral by design.*
+
+---
+
+## Source adapter: Solana 8004 Trustless Agent Registry (QuantuLabs)
+
+The Commons resolver now pulls **real on-chain Solana reputation** from the [8004-solana](https://github.com/QuantuLabs/8004-solana-ts) registry (ATOM engine — trust tier, quality score, confidence, unique callers), making the unified passport genuinely multi-chain (EVM ERC-8004 + Solana 8004 + reputation network + any caller signals).
+
+**How it works**
+- When a resolved subject looks like a Solana address, the resolver calls `fetchSolana8004()` and adds a `solana8004` source to the passport (weighted 1.1).
+- The adapter (`src/lib/sources/solana-8004.ts`) is **optional and lazy** — it dynamically imports `8004-solana` only when enabled. If the package or RPC is missing, it returns null and the resolver still works with every other source. It never throws.
+
+**Enable (live Solana reads)**
+```bash
+npm install 8004-solana @solana/web3.js   # already in optionalDependencies
+export SOLANA_8004_ENABLED=1
+export SOLANA_8004_CLUSTER=mainnet-beta    # or devnet
+export SOLANA_RPC_URL=https://<premium-rpc>   # Helius/QuickNode/Alchemy recommended
+```
+Then `GET /api/trust/resolve/<solana-asset-pubkey>` includes a `solana8004` source with the on-chain ATOM tier/score.
+
+**Disabled by default** — no behaviour change until you set `SOLANA_8004_ENABLED=1`.
+
+### Roadmap follow-up (write-back)
+The 8004-solana SDK also supports *writing* x402 payment feedback on-chain (`giveFeedback` with `x402-resource-delivered` / `x402-good-payer` tags). A future phase can mirror the Trust Layer's own settlement/guard outcomes into the Solana 8004 registry so the two reputation systems reinforce each other (requires a funded Solana signer).
+
+### Write-back (live): mirror Trust Layer outcomes to Solana 8004
+`src/lib/sources/solana-8004-writer.ts` writes x402 feedback on-chain so the Trust Layer's own guard/settlement outcomes reinforce the Solana 8004 reputation. Optional + fire-and-forget; never breaks a paid call.
+
+- `GET  /api/solana8004/status` — is write-back enabled?
+- `POST /api/solana8004/report` (admin) — `{ agentAsset, outcome, feedbackUri? }`; outcome ∈ `resource_delivered | delivery_failed | delivery_timeout | quality_issue | good_payer | payment_failed | insufficient_funds | invalid_signature`. Maps to the matching `x402-*` tag (network `exact-svm`) and calls `giveFeedback`.
+
+**Enable**
+```bash
+npm install 8004-solana @solana/web3.js
+export SOLANA_8004_WRITE_ENABLED=1
+export SOLANA_8004_CLUSTER=mainnet-beta
+export SOLANA_RPC_URL=https://<premium-rpc>
+export SOLANA_PRIVATE_KEY='[12,34,...]'   # funded Solana keypair (JSON secret-key array)
+```
+Disabled by default; reads (`fetchSolana8004`) work without a signer, writes need the funded keypair.
