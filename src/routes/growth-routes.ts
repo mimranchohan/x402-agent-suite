@@ -23,6 +23,10 @@ import {
 } from "../lib/partner-registry.js";
 import { buildCrossProtocolPassport, type ProtocolSignal } from "../lib/cross-protocol-passport.js";
 import { resolveTrust, listKnownNetworks } from "../lib/trust-resolver.js";
+import { scrubMetadata } from "../lib/pii-metadata-filter.js";
+import { quoteGuarantee, buyGuarantee, claimGuarantee, poolStats } from "../lib/guarantee-pool.js";
+import { buildAnchor, latestAnchor, listAnchors, recordAnchorTx } from "../lib/reputation-anchor.js";
+import { SESSION_BUNDLES, SUBSCRIPTION_TIERS, valueBasedFee } from "../lib/pricing-tiers.js";
 
 const LOOKUP_PER_HOUR = Number(process.env.RATE_LIMIT_AGENT_LOOKUP_PER_HOUR ?? "60") || 60;
 
@@ -242,5 +246,61 @@ export function registerGrowthRoutes(app: Express): void {
     if (!body.subject) { res.status(400).json({ error: "subject required" }); return; }
     const signals = Array.isArray(body.networkSignals) ? body.networkSignals : [];
     res.json(await resolveTrust(body.subject, signals, Number(body.ttlSeconds ?? 3600)));
+  }));
+
+  // ---- PII-safe metadata filter (pre-execution scrub of x402 metadata) ----
+
+  /** Scrub x402 payment metadata (resource_url/description/reason/memo) for PII & secrets before it leaves the trust boundary. */
+  app.post("/api/privacy/metadata-scrub", limited, wrap(async (req, res) => {
+    const body = (req.body ?? {}) as { fields?: Record<string, unknown>; metadata?: Record<string, unknown> };
+    const fields = (body.fields && typeof body.fields === "object" ? body.fields : null)
+      ?? (body.metadata && typeof body.metadata === "object" ? body.metadata : null)
+      ?? (body as Record<string, unknown>);
+    if (!fields || typeof fields !== "object") { res.status(400).json({ error: "fields object required" }); return; }
+    res.json(scrubMetadata(fields as Record<string, unknown>));
+  }));
+
+  // ---- Parametric guarantee pool (early access) ----
+  app.post("/api/guarantee/quote", limited, wrap(async (req, res) => {
+    const b = (req.body ?? {}) as { subject?: string; amountUsdc?: number };
+    if (!b.subject) { res.status(400).json({ error: "subject required" }); return; }
+    res.json(await quoteGuarantee(b.subject, Number(b.amountUsdc ?? 0)));
+  }));
+  app.get("/api/guarantee/pool", limited, wrap(async (_req, res) => { res.json(await poolStats()); }));
+  app.post("/api/guarantee/buy", wrap(async (req, res) => {
+    if (!isAdmin(req)) { res.status(403).json({ error: "X-Admin-Secret required (early access)" }); return; }
+    const b = (req.body ?? {}) as { subject?: string; amountUsdc?: number; ttlSeconds?: number };
+    if (!b.subject) { res.status(400).json({ error: "subject required" }); return; }
+    res.json(await buyGuarantee(b.subject, Number(b.amountUsdc ?? 0), Number(b.ttlSeconds ?? 86400)));
+  }));
+  app.post("/api/guarantee/claim", wrap(async (req, res) => {
+    if (!isAdmin(req)) { res.status(403).json({ error: "X-Admin-Secret required (early access)" }); return; }
+    const b = (req.body ?? {}) as { policyId?: string };
+    if (!b.policyId) { res.status(400).json({ error: "policyId required" }); return; }
+    res.json(await claimGuarantee(b.policyId));
+  }));
+
+  // ---- On-chain reputation anchoring ----
+  app.get("/api/reputation/anchor", limited, wrap(async (_req, res) => { res.json(await latestAnchor() ?? { note: "no anchor yet" }); }));
+  app.get("/api/reputation/anchors", limited, wrap(async (req, res) => {
+    const lim = typeof req.query.limit === "string" ? Math.min(100, Math.max(1, Number(req.query.limit) || 20)) : 20;
+    res.json({ anchors: await listAnchors(lim) });
+  }));
+  app.post("/api/reputation/anchor", wrap(async (req, res) => {
+    if (!isAdmin(req)) { res.status(403).json({ error: "X-Admin-Secret required" }); return; }
+    res.status(201).json(await buildAnchor());
+  }));
+  app.post("/api/reputation/anchor/tx", wrap(async (req, res) => {
+    if (!isAdmin(req)) { res.status(403).json({ error: "X-Admin-Secret required" }); return; }
+    const b = (req.body ?? {}) as { anchorId?: string; txHash?: string };
+    if (!b.anchorId || !b.txHash) { res.status(400).json({ error: "anchorId and txHash required" }); return; }
+    res.json({ ok: await recordAnchorTx(b.anchorId, b.txHash) });
+  }));
+
+  // ---- Pricing: bundles, tiers, value-based fee ----
+  app.get("/api/pricing/bundles", limited, wrap(async (_req, res) => { res.json({ sessionBundles: SESSION_BUNDLES, subscriptionTiers: SUBSCRIPTION_TIERS }); }));
+  app.post("/api/pricing/value-fee", limited, wrap(async (req, res) => {
+    const b = (req.body ?? {}) as { amountUsdc?: number };
+    res.json(valueBasedFee(Number(b.amountUsdc ?? 0)));
   }));
 }

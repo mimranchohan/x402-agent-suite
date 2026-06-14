@@ -87,3 +87,33 @@ Returns: composite score+tier+confidence, per-source breakdown, reputation-netwo
 - Wire `recordObservation()` into the existing guard / KYM / fraud handlers so the graph fills automatically from real paid traffic.
 - Publish top reputation scores on-chain (ERC-8004) as a public good + premium write access.
 - Add a public `/reputation` HTML page (threat-feed dashboard) for marketing.
+
+---
+
+## Phase 2 additions (June 2026)
+
+### PII-Safe Metadata Filter (novel — from arXiv 2604.11430)
+Scrubs x402 metadata (resource_url/description/reason/memo) for PII & secrets before settlement.
+- `POST /api/privacy/metadata-scrub` — body `{ "fields": {...} }` → `{ scrubbed, findings, privacyGrade A–F, riskScore, recommendation }`. Detects private keys, seed phrases, API keys, JWT, cards (Luhn), SSN, email, phone, IP. Free, rate-limited.
+
+### Parametric Guarantee Pool (early access — counters Visa/MC "settlement guarantee")
+Reputation-priced cover for high-value payments. Parametric payout if subject later flags HIGH_RISK. **Not licensed insurance; small caps.**
+- `POST /api/guarantee/quote` — `{ subject, amountUsdc }` → premium priced from reputation (free).
+- `GET  /api/guarantee/pool` — pool balance, loss ratio, active policies (free).
+- `POST /api/guarantee/buy` — activate cover (admin / early access).
+- `POST /api/guarantee/claim` — `{ policyId }` parametric claim (admin / early access).
+
+### On-chain Reputation Anchoring (counters ACHIVX portability with verifiability)
+Merkle root over the reputation snapshot, signed; publish the root on Base to make scores verifiable.
+- `GET  /api/reputation/anchor` — latest signed root (free).
+- `GET  /api/reputation/anchors?limit=` — history (free).
+- `POST /api/reputation/anchor` — build a new anchor (admin).
+- `POST /api/reputation/anchor/tx` — record the on-chain tx after publishing (admin).
+
+### Pricing: bundles, tiers, value-based fee
+- `GET  /api/pricing/bundles` — session day/week/month/burst passes + subscription tiers (free).
+- `POST /api/pricing/value-fee` — `{ amountUsdc }` → `max($0.10, 0.5–1% of tx)` quote for high-value flows (free).
+
+### Config
+- `ADMIN_SECRET` gates guarantee buy/claim and anchor build/tx.
+- Guarantee pool + anchors persist under `data/` (move to Postgres for scale — see ARCHITECT-AUDIT).
