@@ -49,6 +49,7 @@ const PROTOCOL_WEIGHT: Record<string, number> = {
   x402: 1.0,
   ap2: 0.9,
   mpp: 0.7,
+  solana8004: 1.1, // real on-chain Solana reputation (ATOM)
   reputation: 1.2, // the Trust Layer's own network is weighted highest
 };
 

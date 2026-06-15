@@ -11,11 +11,13 @@
  */
 import { buildCrossProtocolPassport, type ProtocolSignal, type CrossProtocolPassport } from "./cross-protocol-passport.js";
 import { getReputation } from "./reputation-network.js";
+import { fetchSolana8004 } from "./sources/solana-8004.js";
 
 /** Registry of trust sources the Commons can unify. Open to extension. */
 export const KNOWN_NETWORKS: Record<string, { label: string; kind: string }> = {
   reputation: { label: "x402 Trust Layer Reputation Network", kind: "reputation-graph" },
-  erc8004:    { label: "ERC-8004 On-chain Registry", kind: "onchain-identity" },
+  erc8004:    { label: "ERC-8004 On-chain Registry (EVM)", kind: "onchain-identity" },
+  solana8004: { label: "8004 Trustless Agent Registry (Solana, ATOM)", kind: "onchain-reputation" },
   x402:       { label: "x402 (Coinbase)", kind: "payment-protocol" },
   ap2:        { label: "Google AP2 / UCP", kind: "payment-protocol" },
   mpp:        { label: "MPP", kind: "payment-protocol" },
@@ -47,7 +49,13 @@ export async function resolveTrust(
   networkSignals: ProtocolSignal[] = [],
   ttlSeconds = 3600,
 ): Promise<UnifiedTrust> {
-  const passport = await buildCrossProtocolPassport(subject, networkSignals, ttlSeconds);
+  // Auto-pull real on-chain Solana 8004 reputation (optional; no-ops if disabled/missing).
+  const signals = [...networkSignals];
+  try {
+    const sol = await fetchSolana8004(subject);
+    if (sol) signals.push({ protocol: "solana8004", score: sol.score, markers: sol.markers });
+  } catch { /* never break resolution on an optional source */ }
+  const passport = await buildCrossProtocolPassport(subject, signals, ttlSeconds);
   const rep = await getReputation(subject);
 
   const coverage = passport.sources.map((s) => {
